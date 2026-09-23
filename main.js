@@ -27,7 +27,7 @@ let presets = [
     [3,  3,  2 ] // Custom
 ];
 
-let level = 2;
+let level = 1;
 let gamestate;
 
 let board_width;
