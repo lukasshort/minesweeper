@@ -36,6 +36,8 @@ let board_height;
 let mines;
 let flags;
 let time;
+let starttime = 0;
+let endtime = 0;
 
 let face_state;
 
@@ -62,6 +64,7 @@ document.addEventListener("mousemove", (e) => {
     if(mx > 207 && mx < 282 && my > 41 && my < 116) {mouseOverFace = true}
     else {mouseOverFace = false}
 
+    document.getElementById("mousepos").innerHTML = `x: ${mx.toFixed(0)}, y: ${my.toFixed(0)}`;
     hvr = by*board_width+bx;
 });
 
@@ -208,6 +211,8 @@ function draw() {
     }
 
     //Display Time left
+    if(gamestate == "game") {endtime = Date.now()}
+    time = Math.floor((endtime - starttime) / 1000);
     let strTime = time.toString();
     if(time < 100) {strTime = `0${strTime}`}
     if(time < 10) {strTime = `0${strTime}`}
@@ -282,9 +287,9 @@ function setGamestate(state) {
             break;
         case "game":
             placeMines();
+            starttime = Date.now();
             break;
         case "lose":
-            
             canTouchBoard = false;
             for(let i = 0; i < board_width * board_height; i ++) {
                 if(board[i] > 8 && layer[i] != 3) {layer[i] = 0}
@@ -294,6 +299,10 @@ function setGamestate(state) {
             break;
         case "win":
             canTouchBoard = false;
+            flags = 0;
+            for(let i = 0; i < board_width * board_height; i++) {
+                if(board[i] > 8) {layer[i] = 3}
+            }
             break;
     }
 }
@@ -374,4 +383,15 @@ function reveal(p) {
     layer[p] = 0;
     if(board[p] == 0) {collapseEmpty(p);}
     if(board[p] > 8) {setGamestate("lose");}
+    checkWin();
+}
+
+function checkWin() {
+    let win = true;
+    for(let i = 0; i < board_width * board_height; i++) {
+        if(layer[i] == 1 && board[i] < 9) {win = false; break;}
+    }
+    if(win) {
+        setGamestate("win");
+    }
 }
