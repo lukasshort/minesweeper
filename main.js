@@ -195,7 +195,6 @@ function draw() {
     if(lmbdown && mouseOverBoard && canTouchBoard) {face_state = 3}
     else if(face_state == 3 && canTouchBoard) {face_state = 1}
     //Display Face
-    console.log(face_state);
     hqueue.push({data:sprites[`f${face_state}`],x:hx+30+(board_width/2*48)-39,y:hy+40,w:78,h:78});
     
     //Display Flags left
@@ -277,6 +276,7 @@ function setGamestate(state) {
             mines = presets[level][2];
             flags = mines;
             time = 0;
+            starttime = endtime;
 
             face_state = 1;
 
