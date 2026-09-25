@@ -17,7 +17,7 @@ let mouseOverBoard  = false;
 let mouseOverFace   = false;
 let canTouchBoard   = true;
 
-const tile_width = 48;
+
 
 // All the difficulty presets
 let presets = [
@@ -32,6 +32,8 @@ let gamestate;
 
 let board_width;
 let board_height;
+let scale = 1;
+const tile_width = 16*scale;
 
 let mines;
 let flags;
@@ -55,13 +57,13 @@ document.addEventListener("mousemove", (e) => {
 
     mx = e.clientX - rect.left;
     my = e.clientY - rect.top;
-    bx = Math.floor((mx-30)/48);
-    by = Math.floor((my-156)/48);
+    bx = Math.floor((mx-(10*scale))/(16*scale));
+    by = Math.floor((my-(52*scale))/(16*scale));
 
     if(bx >= 0 && bx < board_width && by >= 0 && by < board_height) {mouseOverBoard = true}
     else {mouseOverBoard = false}
 
-    if(mx > 207 && mx < 282 && my > 41 && my < 116) {mouseOverFace = true}
+    if(mx > 69*scale && mx < 95*scale && my > 15*scale && my < 38*scale) {mouseOverFace = true} //138, 26
     else {mouseOverFace = false}
 
     document.getElementById("mousepos").innerHTML = `x: ${mx.toFixed(0)}, y: ${my.toFixed(0)}`;
@@ -178,14 +180,14 @@ function draw() {
     const hx = 0;
     const hy = 0;
     ctx.fillStyle = "rgb(189, 189, 189)";
-    ctx.fillRect(hx+30, hy+30, board_width*48, 96);
+    ctx.fillRect(hx+10*scale, hy+10*scale, board_width*16*scale, 32*scale);
     let hqueue = [];
-    hqueue.push({data:sprites["eTL"],x:hx,y:hy,w:30,h:30});
-    hqueue.push({data:sprites["eTR"],x:hx+30+(board_width*48),y:hy,w:30,h:30});
-    hqueue.push({data:sprites["eLW"],x:hx+6,y:hy+30,w:30,h:96});
-    hqueue.push({data:sprites["eLW"],x:hx+36+(board_width*48),y:hy+30,w:30,h:96});
+    hqueue.push({data:sprites["eTL"],x:hx,y:hy,w:10*scale,h:10*scale});
+    hqueue.push({data:sprites["eTR"],x:hx+10*scale+(board_width*16*scale),y:hy,w:10*scale,h:10*scale});
+    hqueue.push({data:sprites["eLW"],x:hx+2*scale,y:hy+10*scale,w:10*scale,h:32*scale});
+    hqueue.push({data:sprites["eLW"],x:hx+12*scale+(board_width*16*scale),y:hy+10*scale,w:10*scale,h:32*scale});
     for(let w = 0; w < board_width; w ++) {
-        hqueue.push({data:sprites["eW"],x:hx+30+(w*48),y:hy,w:48,h:30});
+        hqueue.push({data:sprites["eW"],x:hx+10*scale+(w*16*scale),y:hy,w:16*scale,h:10*scale});
     }
 
     // Face State
@@ -195,7 +197,7 @@ function draw() {
     if(lmbdown && mouseOverBoard && canTouchBoard) {face_state = 3}
     else if(face_state == 3 && canTouchBoard) {face_state = 1}
     //Display Face
-    hqueue.push({data:sprites[`f${face_state}`],x:hx+30+(board_width/2*48)-39,y:hy+40,w:78,h:78});
+    hqueue.push({data:sprites[`f${face_state}`],x:hx+10*scale+(board_width/2*16*scale)-13*scale,y:hy+(10*scale)+(3*scale),w:26*scale,h:26*scale});
     
     //Display Flags left
     let strFlags = Math.abs(flags).toString();
@@ -204,7 +206,7 @@ function draw() {
     if(Math.abs(flags) < 10) {strFlags = `0${strFlags}`}
     if(flags < 0) {strFlags = `-${strFlags[1]}${strFlags[2]}`}
     for(let i = 0; i < 3; i ++) {
-        let newSprite = {data:sprites[`d${strFlags[i]}`],x:hx+48+(i*39),y:hy+45,w:39,h:69}
+        let newSprite = {data:sprites[`d${strFlags[i]}`],x:hx+16*scale+(i*13*scale),y:hy+(10*scale)+(5*scale),w:13*scale,h:23*scale}
         if(strFlags[i] == "-") {newSprite.data = sprites['dNeg']}
         hqueue.push(newSprite);
     }
@@ -216,7 +218,7 @@ function draw() {
     if(time < 100) {strTime = `0${strTime}`}
     if(time < 10) {strTime = `0${strTime}`}
     for(let i = 2; i >= 0; i --) {
-        let newSprite = {data:sprites[`d${strTime[i]}`],x:hx+30-135+(board_width*48)+(i*39),y:hy+45,w:39,h:69};
+        let newSprite = {data:sprites[`d${strTime[i]}`],x:hx+10*scale-(45*scale)+(board_width*16*scale)+(i*13*scale),y:hy+(10*scale)+(5*scale),w:13*scale,h:23*scale};
         hqueue.push(newSprite);
     }
 
@@ -230,8 +232,8 @@ function draw() {
     //Draw tiles
     for(let i = 0; i < board_width*board_height; i++) {
         let d = board[i];
-        const x = 30+(i % board_width)*tile_width;
-        const y = 156+(Math.floor(i/board_width))*tile_width;
+        const x = 10*scale+(i % board_width)*tile_width;
+        const y = 52*scale+(Math.floor(i/board_width))*tile_width;
         let sheet_index = `t${d}`;
         if(d > 8) {sheet_index = "tBomb3"}
         if(layer[i] == 1) {sheet_index = "tOff"}
@@ -242,16 +244,16 @@ function draw() {
 
         let data = sprites[sheet_index];
         ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(sheet, data.x, data.y, data.w, data.h, x, y, data.w*3, data.h*3);
+        ctx.drawImage(sheet, data.x, data.y, data.w, data.h, x, y, data.w*scale, data.h*scale);
         let queue = [];
-        if(i%board_width==0) {queue.push({data:sprites["eW"],x:x-30,y:y+48,w:48,h:30,r:-Math.PI/2});}
-        if((i+1)%board_width==0) {queue.push({data:sprites["eW"],x:x+48,y:y+48,w:48,h:30,r:-Math.PI/2});}
-        if(i<board_width) {queue.push({data:sprites["eW"],x:x,y:y-30,w:48,h:30,r:0})}
-        if(i>=board_width*(board_height-1)) {queue.push({data:sprites["eW"],x:x,y:y+48,w:48,h:30,r:0})}
-        if(i<board_width && (i+1)%board_width==0){queue.push({data:sprites["eXR"],x:x+48,y:y-30,w:30,h:30,r:0})}
-        if(i>board_width*(board_height-1) && (i+1)%board_width==0){queue.push({data:sprites["eBR"],x:x+48,y:y+48,w:30,h:30,r:0})}
-        if(i>=board_width*(board_height-1) && i%board_width==0){queue.push({data:sprites["eBL"],x:x-30,y:y+48,w:30,h:30,r:0})}
-        if(i%board_width==0 && i<board_width){queue.push({data:sprites["eXL"],x:x-30,y:y-30,w:30,h:30,r:0})}
+        if(i%board_width==0) {queue.push({data:sprites["eW"],x:x-10*scale,y:y+16*scale,w:16*scale,h:10*scale,r:-Math.PI/2});}
+        if((i+1)%board_width==0) {queue.push({data:sprites["eW"],x:x+16*scale,y:y+16*scale,w:16*scale,h:10*scale,r:-Math.PI/2});}
+        if(i<board_width) {queue.push({data:sprites["eW"],x:x,y:y-10*scale,w:16*scale,h:10*scale,r:0})}
+        if(i>=board_width*(board_height-1)) {queue.push({data:sprites["eW"],x:x,y:y+16*scale,w:16*scale,h:10*scale,r:0})}
+        if(i<board_width && (i+1)%board_width==0){queue.push({data:sprites["eXR"],x:x+16*scale,y:y-10*scale,w:10*scale,h:10*scale,r:0})}
+        if(i>board_width*(board_height-1) && (i+1)%board_width==0){queue.push({data:sprites["eBR"],x:x+16*scale,y:y+16*scale,w:10*scale,h:10*scale,r:0})}
+        if(i>=board_width*(board_height-1) && i%board_width==0){queue.push({data:sprites["eBL"],x:x-10*scale,y:y+16*scale,w:10*scale,h:10*scale,r:0})}
+        if(i%board_width==0 && i<board_width){queue.push({data:sprites["eXL"],x:x-10*scale,y:y-10*scale,w:10*scale,h:10*scale,r:0})}
         for(let a of queue) {
             ctx.save();
             ctx.translate(a.x, a.y);
@@ -270,8 +272,8 @@ function setGamestate(state) {
 
             board_width = presets[level][0];
             board_height = presets[level][1];
-            canvas.width = (board_width) * 48 + 60;
-            canvas.height = (board_height) * 48 + 186;
+            canvas.width = (board_width) * 16*scale + 60;
+            canvas.height = (board_height) * 16*scale + 186;
 
             mines = presets[level][2];
             flags = mines;
